@@ -226,60 +226,84 @@
 		curStyle=style;
 	}
 
-	function deleteTimeSlot(day, index) {
+		function deleteTimeSlot(day, index) {
 			if (day === "Monday") {
-  		timetable.Monday.splice(index, 1);
-  		timetable = timetable;
+				timetable.Monday.splice(index, 1);
+				timetable = timetable;
 			}
 			else if (day === "Tuesday") {
-  		timetable.Tuesday.splice(index, 1);
-  		timetable = timetable;
+				timetable.Tuesday.splice(index, 1);
+				timetable = timetable;
 			}
 			else if (day === "Wednesday") {
-	  	timetable.Wednesday.splice(index, 1);
-  		timetable = timetable;
+				timetable.Wednesday.splice(index, 1);
+				timetable = timetable;
 			}
 			else if (day === "Thursday") {
-  		timetable.Thursday.splice(index, 1);
-  		timetable = timetable;
+				timetable.Thursday.splice(index, 1);
+				timetable = timetable;
 			}
 			else if (day === "Friday") {
-  		timetable.Friday.splice(index, 1);
-  		timetable = timetable;
+				timetable.Friday.splice(index, 1);
+				timetable = timetable;
 			}
+			saveEntry();
+		}
+	function setTimeSlot(day, index, newName, newPeriod, newStyle){
+		if(day==="Monday"){
+			timetable.Monday[index].name = newName;
+			timetable.Monday[index].period = newPeriod;
+			timetable.Monday[index].style = newStyle;
+		}
+		if(day==="Tuesday"){
+			timetable.Tuesday[index].name = newName;
+			timetable.Tuesday[index].period = newPeriod;
+			timetable.Tuesday[index].style = newStyle;
+		}
+		if(day==="Wednesday"){
+			timetable.Wednesday[index].name = newName;
+			timetable.Wednesday[index].period = newPeriod;
+			timetable.Wednesday[index].style = newStyle;
+		}
+		if(day==="Thursday"){
+			timetable.Thursday[index].name = newName;
+			timetable.Thursday[index].period = newPeriod;
+			timetable.Thursday[index].style = newStyle;
+		}
+		if(day==="Friday"){
+			timetable.Friday[index].name = newName;
+			timetable.Friday[index].period = newPeriod;
+			timetable.Friday[index].style = newStyle;
+		}
+		saveEntry();
 	}
-	// function setTimeSlot(day, index, newName, newPeriod, newStyle){
-	// 	if(day==="Monday"){
-	// 		timetable.Monday[index].name = newName;
-	// 		timetable.Monday[index].period = newPeriod;
-	// 		timetable.Monday[index].style = newStyle;
-	// 	}
-	// 	if(day==="Tuesday"){
-	// 		timetable.Tuesday[index].name = newName;
-	// 		timetable.Tuesday[index].period = newPeriod;
-	// 		timetable.Tuesday[index].style = newStyle;
-	// 	}
-	// 	if(day==="Wednesday"){
-	// 		timetable.Wednesday[index].name = newName;
-	// 		timetable.Wednesday[index].period = newPeriod;
-	// 		timetable.Wednesday[index].style = newStyle;
-	// 	}
-	// 	if(day==="Thursday"){
-	// 		timetable.Thursday[index].name = newName;
-	// 		timetable.Thursday[index].period = newPeriod;
-	// 		timetable.Thursday[index].style = newStyle;
-	// 	}
-	// 	if(day==="Friday"){
-	// 		timetable.Friday[index].name = newName;
-	// 		timetable.Friday[index].period = newPeriod;
-	// 		timetable.Friday[index].style = newStyle;
-	// 	}
-	// }
+	// Upsert entry
+	async function saveEntry() {
+		const { error } = await supabase.from("studentEntries").upsert(
+			{
+			user_id: supabase.auth.user().id,
+			timetable: timetable,
+			},
+			{ onConflict: "user_id" }
+		);
+		if (error) alert(error.message);
+	}
+
+	// Get entries
+async function getEntries() {
+  const { data, error } = await supabase.from("studentEntries").select();
+  if (error) alert(error.message);
+
+  if (data != "") {
+    timetable = data[0].timetable;
+  }
+}
+
+getEntries();
 </script>
 
 <h1>My Dashboard</h1>
 <h7>School Timetable</h7>
-
 <table class="table table-bordered text-center ">
     <thead>
       <!--for the first row-->
@@ -379,7 +403,7 @@
               	timeSlot.period,
               	timeSlot.style
             	)}
->{timeSlot.name}</button>
+			>{timeSlot.name}</button>
           </td>
         {/each}
 			<td class="btn" on:click={() => addTimeSlot("Friday")}>+</td>
@@ -431,7 +455,7 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
 		<button type="button" class="btn btn-danger" data-bs-dismiss="modal" on:click={() => deleteTimeSlot(curDay, curIndex)}>Delete</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
+        <button type="button" class="btn btn-primary" on:click={()=>{setTimeSlot(curDay, curIndex, curName, curPeriod, curStyle)}}>Save changes</button>
       </div>
     </div>
   </div>
